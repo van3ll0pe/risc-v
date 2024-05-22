@@ -75,7 +75,7 @@ Riscv32i<MEMORY_SIZE>::decode_I_type()
     uint8_t rd = (this->current_instr & 0b111110000000) >> 7;
     uint8_t funct_3 = (this->current_instr & 0b111000000000000) >> 12;
     uint8_t rs1 = (this->current_instr & 0b11111000000000000000) >> 15;
-    uint16_t imm11_0 = (this->current_instr & 0b11111111111100000000000000000000) >> 20;
+    uint32_t imm11_0 = (this->current_instr & 0b11111111111100000000000000000000) >> 20;
 
     switch(this->opcode) {
         case 0b0010011:  //calcul immediate operation
@@ -118,11 +118,11 @@ template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::decode_S_type()
 {
-    uint8_t imm4_0 = (this->current_instr & 0b111110000000) >> 7;
     uint8_t funct_3 = (this->current_instr & 0b111000000000000) >> 12;
     uint8_t rs1 = (this->current_instr & 0b11111000000000000000) >> 15;
     uint8_t rs2 = (this->current_instr & 0b1111100000000000000000000) >> 20;
-    uint8_t imm11_5 = (this->current_instr & 0b11111110000000000000000000000000) >> 25;
+    uint32_t imm = (this->current_instr & 0b111110000000) >> 7; //get imm[4:0]
+    imm += ((this->current_instr & 0b11111110000000000000000000000000) >> 20); //get imm[11:5] and put on the bit 5 of the imm;
 
     if (funct_3 == 0x0) //STORE BYTE
     else if (funct_3 == 0x1) //STORE HALF
@@ -133,5 +133,24 @@ template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::decode_B_type()
 {
-    
+
 }
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::decode_U_type()
+{
+    uint8_t rd = (this->current_instr & 0b111110000000) >> 7;
+    uint32_t imm31_12 = (this->current_instr & 0b11111111111111111111000000000000);
+
+    if (this->opcode == 0b0110111) //LUI
+    else if (this->opcode == 0b0010111) //AUIPC
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::decode_J_type()
+{
+
+}
+
