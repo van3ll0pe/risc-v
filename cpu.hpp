@@ -13,12 +13,13 @@ class Riscv32i {
         std::array<uint32_t, 32> reg_x;
         uint32_t program_counter;
         uint32_t current_instr;
+        uint32_t current_address;
         uint8_t opcode;
 
     public:
         Riscv32i(uint32_t start_address = 0x0);
         ~Riscv32i();
-        void run(std::span);
+        void run(std::span program);
 
     private: //fetch - decode - execute
         void fetch(); //get opcode
@@ -30,6 +31,8 @@ class Riscv32i {
         void decode_U_type();
         void decode_J_type();
         void execute();
+        void reset_x0();
+
 
     private: //all instructions of riscv32i
         void instr_add();

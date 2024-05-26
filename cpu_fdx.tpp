@@ -6,6 +6,8 @@ Riscv32i<MEMORY_SIZE>::fetch()
 {
     this->current_instr = 0x0;
 
+    this->current_address = this->program_counter;
+
     //little endian extraction
     for (int i = 0; i < 4; i++) {
         this->current_instr += (this->memory_bus->read(this->program_counter) << (8 * i));
@@ -49,11 +51,11 @@ template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::decode_R_type()
 {
-    uint8_t rd = (this->current_instr & 0b111110000000) >> 7;
-    uint8_t funct_3 = (this->current_instr & 0b111000000000000) >> 12;
-    uint8_t rs1 = (this->current_instr & 0b11111000000000000000) >> 15;
-    uint8_t rs2 = (this->current_instr & 0b1111100000000000000000000) >> 20;
-    uint8_t funct_7 = (this->current_instr & 0b11111110000000000000000000000000) >> 25;
+    uint8_t rd = (this->current_instr & 0xF80) >> 7;
+    uint8_t funct_3 = (this->current_instr & 0x7000) >> 12;
+    uint8_t rs1 = (this->current_instr & 0xF8000) >> 15;
+    uint8_t rs2 = (this->current_instr & 0x1F00000) >> 20;
+    uint8_t funct_7 = (this->current_instr & 0xFE000000) >> 25;
 
     if (funct_3 ==  0x0 && funct_7 == 0x0) //ADD
     else if (funct_3 == 0x0 && funct_7 == 0x20) //SUB
@@ -72,10 +74,13 @@ template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::decode_I_type()
 {
-    uint8_t rd = (this->current_instr & 0b111110000000) >> 7;
-    uint8_t funct_3 = (this->current_instr & 0b111000000000000) >> 12;
-    uint8_t rs1 = (this->current_instr & 0b11111000000000000000) >> 15;
-    uint32_t imm = (this->current_instr & 0b11111111111100000000000000000000) >> 20;
+    uint8_t rd = (this->current_instr & 0xFFF00000) >> 7;
+    uint8_t funct_3 = (this->current_instr & 0x7000) >> 12;
+    uint8_t rs1 = (this->current_instr & 0xF8000) >> 15;
+    uint32_t imm = (this->current_instr & 0xFFF00000) >> 20;
+
+    if (imm & 0x800) //negative number signed 12 bits (11:0) signed in bit 11
+        imm |= 0xFFFFF000;
 
     switch(this->opcode) {
         case 0b0010011:  //calcul immediate operation
@@ -118,11 +123,13 @@ template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::decode_S_type()
 {
-    uint8_t funct_3 = (this->current_instr & 0b111000000000000) >> 12;
-    uint8_t rs1 = (this->current_instr & 0b11111000000000000000) >> 15;
-    uint8_t rs2 = (this->current_instr & 0b1111100000000000000000000) >> 20;
-    uint32_t imm = (this->current_instr & 0b111110000000) >> 7; //get imm[4:0]
-    imm += ((this->current_instr & 0b11111110000000000000000000000000) >> 20); //get imm[11:5] and put on the bit 5 of the imm;
+    uint8_t funct_3 = (this->current_instr & 0x7000) >> 12;
+    uint8_t rs1 = (this->current_instr & 0xF8000) >> 15;
+    uint8_t rs2 = (this->current_instr & 0x1F00000) >> 20;
+    uint32_t imm = ((this->current_instr & 0xF80) >> 7) | ((this->current_instr & 0xFE000000) >> 20);
+
+    if (imm & 0x800)
+        imm |= 0xFFFFF000;
 
     if (funct_3 == 0x0) //STORE BYTE
     else if (funct_3 == 0x1) //STORE HALF
@@ -138,6 +145,10 @@ Riscv32i<MEMORY_SIZE>::decode_B_type()
     uint8_t rs2 = (this->current_instr & 0x1F00000) >> 20;
     uint32_t imm = (this->current_instr & 0xF00) >> 7 | (this->current_instr & 0x7E000000) >> 20 | (this->current_instr & 0x80) << 4 | (this->current_instr & 0x80000000) >> 19;
 
+    if (imm & 0x1000) //signed 20bit, negative in bit 20
+        imm |= 0xFFFFE000;
+
+
     if (funct_3 == 0x0) //BEQ
     else if (funct_3 == 0x1) //Bne
     else if (funct_3 == 0x4) //BLT
@@ -150,8 +161,8 @@ template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::decode_U_type()
 {
-    uint8_t rd = (this->current_instr & 0b111110000000) >> 7;
-    uint32_t imm = (this->current_instr & 0b11111111111111111111000000000000);
+    uint8_t rd = (this->current_instr & 0xF80) >> 7;
+    uint32_t imm = (this->current_instr & 0xFFFFF000);
 
     if (this->opcode == 0b0110111) //LUI
     else if (this->opcode == 0b0010111) //AUIPC
@@ -161,11 +172,11 @@ template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::decode_J_type()
 {
-    uint8_t rd = (this->current_instr & 0b111110000000) >> 7;
-    uint32_t imm = (this->current_instr & 0b1111111111000000000000000000000) >> 20;
-    imm += (this->current_instr & 0b100000000000000000000) >> 9;
-    imm += (this->current_instr & 0b11111111000000000000);
-    imm += (this->current_instr & 0b10000000000000000000000000000000) >> 11;
+    uint8_t rd = (this->current_instr & 0xF80) >> 7;
+    uint32_t imm = ((this->current_instr & 0x7FE00000) >> 20) | ((this->current_instr & 0x100000) >> 9) | (this->current_instr & 0xFF000) | ((this->current_instr & 0x80000000) >> 11);
+
+    if (imm & 0x100000) //negative number signed in bit 20 (20:1)
+        imm |= 0xFFE00000;
 
     //JAL instruction
 }
