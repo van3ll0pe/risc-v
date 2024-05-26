@@ -145,7 +145,7 @@ Riscv32i<MEMORY_SIZE>::decode_B_type()
     uint8_t rs2 = (this->current_instr & 0x1F00000) >> 20;
     uint32_t imm = (this->current_instr & 0xF00) >> 7 | (this->current_instr & 0x7E000000) >> 20 | (this->current_instr & 0x80) << 4 | (this->current_instr & 0x80000000) >> 19;
 
-    if (imm & 0x1000) //signed 20bit, negative in bit 20
+    if (imm & 0x1000) //signed 13bits (12-0) 0 ignored
         imm |= 0xFFFFE000;
 
 
