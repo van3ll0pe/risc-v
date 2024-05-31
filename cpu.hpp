@@ -46,15 +46,15 @@ class Riscv32i {
         void instr_slt();
         void instr_sltu();
 
-        void instr_addi();
-        void instr_xori();
-        void instr_ori();
-        void instr_andi();
+        void instr_addi(uint8_t rs1, uint8_t rd, uint32_t imm);
+        void instr_xori(uint8_t rs1, uint8_t rd, uint32_t imm);
+        void instr_ori(uint8_t rs1, uint8_t rd, uint32_t imm);
+        void instr_andi(uint8_t rs1, uint8_t rd, uint32_t imm);
         void instr_slli();
         void instr_srli();
         void instr_srai();
-        void instr_slti();
-        void instr_sltiu();
+        void instr_slti(uint8_t rs1, uint8_t rd, uint32_t imm);
+        void instr_sltiu(uint8_t rs1, uint8_t rd, uint32_t imm);
 
         void instr_lb();
         void instr_lh();
