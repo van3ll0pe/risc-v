@@ -74,7 +74,7 @@ template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::decode_I_type()
 {
-    uint8_t rd = (this->current_instr & 0xFFF00000) >> 7;
+    uint8_t rd = (this->current_instr & 0xF80) >> 7;
     uint8_t funct_3 = (this->current_instr & 0x7000) >> 12;
     uint8_t rs1 = (this->current_instr & 0xF8000) >> 15;
     uint32_t imm = (this->current_instr & 0xFFF00000) >> 20;
@@ -85,12 +85,12 @@ Riscv32i<MEMORY_SIZE>::decode_I_type()
     switch(this->opcode) {
         case 0b0010011:  //calcul immediate operation
                         if (funct_3 == 0x0) //ADDI
-                        else if (funct_3 == 0x1 && ((imm11_0 & 0xFE0)) == 0x0) //SLLI
+                        else if (funct_3 == 0x1 && ((imm & 0xFE0) == 0x0)) //SLLI
                         else if (funct_3 == 0x2) //SLTI
                         else if (funct_3 == 0x3) //SLTI U
                         else if (funct_3 == 0x4) //XORI
-                        else if (funct_3 == 0x5 && ((imm11_0 & 0xFE0)) == 0x0) // SRLI
-                        else if (funct_3 == 0x5 && ((imm11_0 & 0xFE0)) == 0x20) // SRAI
+                        else if (funct_3 == 0x5 && ((imm & 0xFE0) == 0x0)) // SRLI
+                        else if (funct_3 == 0x5 && ((imm & 0xFE0) == 0x400)) // SRAI, 400 revient à 0x20 s'il y a un décalage de 5bits
                         else if (funct_3 == 0x6) //ORI
                         else if (funct_3 == 0x7) //ANDI
                         
@@ -111,8 +111,8 @@ Riscv32i<MEMORY_SIZE>::decode_I_type()
                         break; 
 
         case 0b1110011: //ecall & ebreak
-                        if (funct_3 == 0x0 && imm11_0 == 0x0) //ecall
-                        else if (funct_3 == 0x0 && imm11_0 == 0x1) //ebreak
+                        if (funct_3 == 0x0 && imm == 0x0) //ecall
+                        else if (funct_3 == 0x0 && imm == 0x1) //ebreak
 
                         break; 
         default: break;
