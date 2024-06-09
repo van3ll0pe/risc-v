@@ -17,7 +17,4 @@ class Memory {
         uint8_t read(uint32_t address);
 };
 
-#include "memory.tpp"
-
-
 #endif //__MEMORY_HPP__
