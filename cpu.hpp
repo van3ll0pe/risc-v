@@ -19,7 +19,7 @@ class Riscv32i {
     public:
         Riscv32i(uint32_t start_address = 0x0);
         ~Riscv32i();
-        void run(std::span program);
+        void run();
 
     private: //fetch - decode - execute
         void fetch(); //get opcode
@@ -35,16 +35,16 @@ class Riscv32i {
 
 
     private: //all instructions of riscv32i
-        void instr_add();
-        void instr_sub();
-        void instr_xor();
-        void instr_or();
-        void instr_and();
-        void instr_sll();
-        void instr_srl();
-        void instr_sra();
-        void instr_slt();
-        void instr_sltu();
+        void instr_add(uint8_t rd, uint8_t rs1, uint8_t rs2);
+        void instr_sub(uint8_t rd, uint8_t rs1, uint8_t rs2);
+        void instr_xor(uint8_t rd, uint8_t rs1, uint8_t rs2);
+        void instr_or(uint8_t rd, uint8_t rs1, uint8_t rs2);
+        void instr_and(uint8_t rd, uint8_t rs1, uint8_t rs2);
+        void instr_sll(uint8_t rd, uint8_t rs1, uint8_t rs2);
+        void instr_srl(uint8_t rd, uint8_t rs1, uint8_t rs2);
+        void instr_sra(uint8_t rd, uint8_t rs1, uint8_t rs2);
+        void instr_slt(uint8_t rd, uint8_t rs1, uint8_t rs2);
+        void instr_sltu(uint8_t rd, uint8_t rs1, uint8_t rs2);
 
         void instr_addi(uint8_t rs1, uint8_t rd, uint32_t imm);
         void instr_xori(uint8_t rs1, uint8_t rd, uint32_t imm);
@@ -76,15 +76,11 @@ class Riscv32i {
         void instr_jal();
         void instr_jalr();
 
-        void instr_lui();
-        void instr_auipc();
+        void instr_lui(uint8_t rd, uint32_t imm);
+        void instr_auipc(uint8_t rd, uint32_t imm);
 
         void instr_ecall();
         void instr_ebreak();
 };
-
-#include "cpu.tpp"
-#include "cpu_fdx.tpp"
-#include "cpu_instr.tpp"
 
 #endif //__RISCV32I_HPP__
