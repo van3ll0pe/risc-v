@@ -165,3 +165,27 @@ Riscv32i<MEMORY_SIZE>::instr_sra(uint8_t rd, uint8_t rs1, uint8_t rs2)
 }
 
 /***************************************************************** */
+
+/*************** UNCONDITIONAL JUMPS ******************************/
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_jal(uint8_t rd, uint32_t imm) //imm value ignore bit 0, no need to put bit 0 to 0
+{
+    this->reg_x[rd] = this->program_counter; //pc is already to the next instruction (no need to add +4)
+
+    this->program_counter = this->current_address + imm; // add with current_address which is on the jal instr because pc is on the next instr
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_jalr(uint8_t rd, uint8_t rs1, uint32_t imm) //imm value need to put bit 0 to 0
+{
+    this->reg_x[rd] = this->program_counter; // pc is already to the next instruction (no need to add +4)
+
+    this->program_counter = (this->reg_x[rs1] + imm) & 0xFFFFFFFE; // put the bit 0 of the result to 0
+}
+
+/****************************************************************/
+
+/****************** CONDITIONAL BRANCH *************************/

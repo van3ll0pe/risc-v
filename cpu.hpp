@@ -73,8 +73,8 @@ class Riscv32i {
         void instr_bltu();
         void instr_bgeu();
 
-        void instr_jal();
-        void instr_jalr();
+        void instr_jal(uint8_t rd, uint32_t imm);
+        void instr_jalr(uint8_t rd, uint8_t rs1, uint32_t imm);
 
         void instr_lui(uint8_t rd, uint32_t imm);
         void instr_auipc(uint8_t rd, uint32_t imm);
