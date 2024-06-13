@@ -189,3 +189,56 @@ Riscv32i<MEMORY_SIZE>::instr_jalr(uint8_t rd, uint8_t rs1, uint32_t imm) //imm v
 /****************************************************************/
 
 /****************** CONDITIONAL BRANCH *************************/
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_beq(uint8_t rs1, uint8_t rs2, uint32_t imm)
+{
+    if (this->reg_x[rs1] == this->reg_x[rs2])
+        this->program_counter = this->current_address + imm;
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_bne(uint8_t rs1, uint8_t rs2, uint32_t imm)
+{
+    if (this->reg_x[rs1] != this->reg_x[rs2])
+        this->program_counter = this->current_address + imm;
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_blt(uint8_t rs1, uint8_t rs2, uint32_t imm)
+{
+     if ((signed int)this->reg_x[rs1] < (signed int)this->reg_x[rs2])
+        this->program_counter = this->current_address + imm;
+
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_bltu(uint8_t rs1, uint8_t rs2, uint32_t imm)
+{
+    if (this->reg_x[rs1] < this->reg_x[rs2]) //already unsigned type
+        this->program_counter = this->current_address + imm;
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_bge(uint8_t rs1, uint8_t rs2, uint32_t imm)
+{
+    if ((signed int)this->reg_x[rs1] >= (signed int)this->reg_x[rs2])
+        this->program_counter = this->current_address + imm;
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_bgeu(uint8_t rs1, uint8_t rs2, uint32_t imm)
+{
+    if (this->reg_x[rs1] >= this->reg_x[rs2]) //already unsigned type
+        this->program_counter = this->current_address + imm;
+}
+
+/***********************************************************************************/
+
+/************ LOAD / STORE INSTRUCTIONS *********************************************/

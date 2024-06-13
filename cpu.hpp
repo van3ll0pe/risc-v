@@ -66,12 +66,12 @@ class Riscv32i {
         void instr_sh();
         void instr_sw();
 
-        void instr_beq();
-        void instr_bne();
-        void instr_blt();
-        void instr_bge();
-        void instr_bltu();
-        void instr_bgeu();
+        void instr_beq(uint8_t rs1, uint8_t rs2, uint32_t imm);
+        void instr_bne(uint8_t rs1, uint8_t rs2, uint32_t imm);
+        void instr_blt(uint8_t rs1, uint8_t rs2, uint32_t imm);
+        void instr_bge(uint8_t rs1, uint8_t rs2, uint32_t imm);
+        void instr_bltu(uint8_t rs1, uint8_t rs2, uint32_t imm);
+        void instr_bgeu(uint8_t rs1, uint8_t rs2, uint32_t imm);
 
         void instr_jal(uint8_t rd, uint32_t imm);
         void instr_jalr(uint8_t rd, uint8_t rs1, uint32_t imm);
