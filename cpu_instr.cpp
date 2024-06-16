@@ -242,3 +242,113 @@ Riscv32i<MEMORY_SIZE>::instr_bgeu(uint8_t rs1, uint8_t rs2, uint32_t imm)
 /***********************************************************************************/
 
 /************ LOAD / STORE INSTRUCTIONS *********************************************/
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_lw(uint8_t rd, uint8_t rs1, uint32_t imm)
+{
+    uint32_t value = 0;
+    uint32_t address = (imm + this->reg_x[rs1]) & 0xFFFFFFFC;
+
+    for (int i = 0; i < 4; i++) {
+        value += (this->memory_bus->read(address) << (8 * i));
+        address++;
+    }
+
+    this->reg_x[rd] = value;
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_lh(uint8_t rd, uint8_t rs1, uint32_t imm)
+{
+    uint32_t value = 0;
+    uint32_t address = (imm + this->reg_x[rs1]) & 0xFFFFFFFE;
+
+    for (int i = 0; i < 2; i++) { //get 2 bytes value
+        value += (this->memory_bus->read(address) << (8 * i));
+        address++;
+    }
+
+    if (value & 0x8000) //signed extends
+        value |= 0xFFFF0000;
+    
+    this->reg_x[rd] = value;
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_lhu(uint8_t rd, uint8_t rs1, uint32_t imm)
+{
+    uint32_t value = 0;
+    uint32_t address = (imm + this->reg_x[rs1]) & 0xFFFFFFFE;
+
+    for (int i = 0; i < 2; i++) { //get 2 bytes value
+        value += (this->memory_bus->read(address) << (8 * i));
+        address++;
+    }
+    //zero extends
+
+    this->reg_x[rd] = value;
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_lb(uint8_t rd, uint8_t rs1, uint32_t imm)
+{
+    uint32_t value;
+    uint32_t address = (imm + this->reg_x[rs1]);
+
+    value = this->memory_bus->read(address);
+
+    if (value & 0x80) //signed extends 8bits value
+        value |= 0xFFFFFF00;
+    
+    this->reg_x[rd] = value;
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_lbu(uint8_t rd, uint8_t rs1, uint32_t imm)
+{
+     uint32_t value;
+    uint32_t address = (imm + this->reg_x[rs1]);
+
+    value = this->memory_bus->read(address);
+
+    //zero extends
+    this->reg_x[rd] = value;
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_sw(uint8_t rs1, uint8_t rs2, uint32_t imm)
+{
+    uint32_t  address = (this-reg_x[rs1] + imm) & 0xFFFFFFFC;
+
+    for (int i = 0; i < 4; i++) {
+        uint8_t data = (this->reg_x[rs2] & (0xFF << (i * 8))) >> (i * 8);
+        this->memory_bus->write(address, data);
+        address++;
+    }
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_sh(uint8_t rs1, uint8_t rs2, uint32_t imm)
+{
+    uint32_t address = (this->reg_x[rs1] + imm) & 0xFFFFFFFE;
+
+    for (int i = 0; i < 2; i++) {
+        uint8_t data = (this->reg_x[rs2] & (0xFF << (i * 8))) >> (i * 8);
+        this->memory_bus->write(address, data);
+        address++;
+    }
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_sb(uint8_t rs1, uint8_t rs2, uint32_t imm)
+{
+    this->memory_bus->write(this->reg_x[rs1] + imm, this->reg_x[rs2] & 0xFF);
+}
