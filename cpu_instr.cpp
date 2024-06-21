@@ -352,3 +352,94 @@ Riscv32i<MEMORY_SIZE>::instr_sb(uint8_t rs1, uint8_t rs2, uint32_t imm)
 {
     this->memory_bus->write(this->reg_x[rs1] + imm, this->reg_x[rs2] & 0xFF);
 }
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_ebreak()
+{
+    exit(0);
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_ecall()
+{
+    //NOP currently
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_fence()
+{
+    std::atomic_thread_fence(std::memory_order_seq_cst);
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_fencei()
+{
+    //NOP currently
+}
+
+template<uint64_t MEMORY_SIZE>
+void 
+Riscv32i<MEMORY_SIZE>::instr_csrrw()
+{
+
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_csrrs()
+{
+
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_csrrc()
+{
+
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_csrrwi()
+{
+
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_csrrsi()
+{
+
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_csrrci()
+{
+
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_rdcycle()
+{
+
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_rdtime()
+{
+
+}
+
+template<uint64_t MEMORY_SIZE>
+void
+Riscv32i<MEMORY_SIZE>::instr_rdinstret()
+{
+    
+}

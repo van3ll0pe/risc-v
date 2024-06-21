@@ -30,7 +30,6 @@ class Riscv32i {
         void decode_B_type();
         void decode_U_type();
         void decode_J_type();
-        void execute();
         void reset_x0();
 
 
@@ -81,6 +80,20 @@ class Riscv32i {
 
         void instr_ecall();
         void instr_ebreak();
+
+        void instr_fence();
+        void instr_fencei();
+
+        void instr_csrrw();
+        void instr_csrrs();
+        void instr_csrrc();
+        void instr_csrrwi();
+        void instr_csrrsi();
+        void instr_csrrci();
+
+        void instr_rdcycle();
+        void instr_rdtime();
+        void instr_rdinstret();
 };
 
 #endif //__RISCV32I_HPP__
