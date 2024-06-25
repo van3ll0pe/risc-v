@@ -81,7 +81,7 @@ template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::instr_auipc(uint8_t rd, uint32_t imm)
 {
-    this->reg_x[rd] = this->current_address + imm;
+    this->reg_x[rd] = this->program_counter + imm;
 }
 
 /************************************************************************/
@@ -172,9 +172,9 @@ template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::instr_jal(uint8_t rd, uint32_t imm) //imm value ignore bit 0, no need to put bit 0 to 0
 {
-    this->reg_x[rd] = this->program_counter; //pc is already to the next instruction (no need to add +4)
+    this->reg_x[rd] = this->program_counter + 4; //pc + 4 to be on the next instruction
 
-    this->program_counter = this->current_address + imm; // add with current_address which is on the jal instr because pc is on the next instr
+    this->program_counter += imm;
 }
 
 template<uint64_t MEMORY_SIZE>
@@ -195,7 +195,7 @@ void
 Riscv32i<MEMORY_SIZE>::instr_beq(uint8_t rs1, uint8_t rs2, uint32_t imm)
 {
     if (this->reg_x[rs1] == this->reg_x[rs2])
-        this->program_counter = this->current_address + imm;
+        this->program_counter += imm;
 }
 
 template<uint64_t MEMORY_SIZE>
@@ -203,7 +203,7 @@ void
 Riscv32i<MEMORY_SIZE>::instr_bne(uint8_t rs1, uint8_t rs2, uint32_t imm)
 {
     if (this->reg_x[rs1] != this->reg_x[rs2])
-        this->program_counter = this->current_address + imm;
+        this->program_counter += imm;
 }
 
 template<uint64_t MEMORY_SIZE>
@@ -211,7 +211,7 @@ void
 Riscv32i<MEMORY_SIZE>::instr_blt(uint8_t rs1, uint8_t rs2, uint32_t imm)
 {
      if ((signed int)this->reg_x[rs1] < (signed int)this->reg_x[rs2])
-        this->program_counter = this->current_address + imm;
+        this->program_counter += imm;
 
 }
 
@@ -220,7 +220,7 @@ void
 Riscv32i<MEMORY_SIZE>::instr_bltu(uint8_t rs1, uint8_t rs2, uint32_t imm)
 {
     if (this->reg_x[rs1] < this->reg_x[rs2]) //already unsigned type
-        this->program_counter = this->current_address + imm;
+        this->program_counter += imm;
 }
 
 template<uint64_t MEMORY_SIZE>
@@ -228,7 +228,7 @@ void
 Riscv32i<MEMORY_SIZE>::instr_bge(uint8_t rs1, uint8_t rs2, uint32_t imm)
 {
     if ((signed int)this->reg_x[rs1] >= (signed int)this->reg_x[rs2])
-        this->program_counter = this->current_address + imm;
+        this->program_counter += imm;
 }
 
 template<uint64_t MEMORY_SIZE>
@@ -236,7 +236,7 @@ void
 Riscv32i<MEMORY_SIZE>::instr_bgeu(uint8_t rs1, uint8_t rs2, uint32_t imm)
 {
     if (this->reg_x[rs1] >= this->reg_x[rs2]) //already unsigned type
-        this->program_counter = this->current_address + imm;
+        this->program_counter += imm;
 }
 
 /***********************************************************************************/
@@ -247,77 +247,55 @@ template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::instr_lw(uint8_t rd, uint8_t rs1, uint32_t imm)
 {
-    uint32_t value = 0;
     uint32_t address = (imm + this->reg_x[rs1]) & 0xFFFFFFFC;
-
-    for (int i = 0; i < 4; i++) {
-        value += (this->memory_bus->read(address) << (8 * i));
-        address++;
-    }
-
-    this->reg_x[rd] = value;
+    uint32_t data = this->memory.read32(address);
+    this->reg_x[rd] = data;
 }
 
 template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::instr_lh(uint8_t rd, uint8_t rs1, uint32_t imm)
 {
-    uint32_t value = 0;
     uint32_t address = (imm + this->reg_x[rs1]) & 0xFFFFFFFE;
+    uint32_t data = this->memory.read16(address);
 
-    for (int i = 0; i < 2; i++) { //get 2 bytes value
-        value += (this->memory_bus->read(address) << (8 * i));
-        address++;
-    }
-
-    if (value & 0x8000) //signed extends
-        value |= 0xFFFF0000;
+    if (data & 0x8000) //signed extends
+        data |= 0xFFFF0000;
     
-    this->reg_x[rd] = value;
+    this->reg_x[rd] = data;
 }
 
 template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::instr_lhu(uint8_t rd, uint8_t rs1, uint32_t imm)
 {
-    uint32_t value = 0;
     uint32_t address = (imm + this->reg_x[rs1]) & 0xFFFFFFFE;
-
-    for (int i = 0; i < 2; i++) { //get 2 bytes value
-        value += (this->memory_bus->read(address) << (8 * i));
-        address++;
-    }
+    uint32_t data = this->memory.read16(address);
     //zero extends
-
-    this->reg_x[rd] = value;
+    this->reg_x[rd] = data;
 }
 
 template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::instr_lb(uint8_t rd, uint8_t rs1, uint32_t imm)
 {
-    uint32_t value;
     uint32_t address = (imm + this->reg_x[rs1]);
+    uint32_t data = this->memory.read8(address);
 
-    value = this->memory_bus->read(address);
-
-    if (value & 0x80) //signed extends 8bits value
-        value |= 0xFFFFFF00;
+    if (data & 0x80) //signed extends 8bits value
+        data |= 0xFFFFFF00;
     
-    this->reg_x[rd] = value;
+    this->reg_x[rd] = data;
 }
 
 template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::instr_lbu(uint8_t rd, uint8_t rs1, uint32_t imm)
 {
-     uint32_t value;
     uint32_t address = (imm + this->reg_x[rs1]);
-
-    value = this->memory_bus->read(address);
-
+    uint32_t data = this->memory.read8(address);
     //zero extends
-    this->reg_x[rd] = value;
+    this->reg_x[rd] = data;
 }
 
 template<uint64_t MEMORY_SIZE>
@@ -326,11 +304,7 @@ Riscv32i<MEMORY_SIZE>::instr_sw(uint8_t rs1, uint8_t rs2, uint32_t imm)
 {
     uint32_t  address = (this-reg_x[rs1] + imm) & 0xFFFFFFFC;
 
-    for (int i = 0; i < 4; i++) {
-        uint8_t data = (this->reg_x[rs2] & (0xFF << (i * 8))) >> (i * 8);
-        this->memory_bus->write(address, data);
-        address++;
-    }
+    this->memory.write32(address, this->reg_x[rs2]);
 }
 
 template<uint64_t MEMORY_SIZE>
@@ -339,18 +313,14 @@ Riscv32i<MEMORY_SIZE>::instr_sh(uint8_t rs1, uint8_t rs2, uint32_t imm)
 {
     uint32_t address = (this->reg_x[rs1] + imm) & 0xFFFFFFFE;
 
-    for (int i = 0; i < 2; i++) {
-        uint8_t data = (this->reg_x[rs2] & (0xFF << (i * 8))) >> (i * 8);
-        this->memory_bus->write(address, data);
-        address++;
-    }
+    this->memory.write16(address, (uint16_t)this->reg_x[rs2]);
 }
 
 template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::instr_sb(uint8_t rs1, uint8_t rs2, uint32_t imm)
 {
-    this->memory_bus->write(this->reg_x[rs1] + imm, this->reg_x[rs2] & 0xFF);
+    this->memory.write8(this->reg_x[rs1] + imm, (uint8_t)this->reg_x[rs2]);
 }
 
 template<uint64_t MEMORY_SIZE>
@@ -378,7 +348,7 @@ template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::instr_fencei()
 {
-    //NOP currently
+    this->cache.clearCache();
 }
 
 template<uint64_t MEMORY_SIZE>

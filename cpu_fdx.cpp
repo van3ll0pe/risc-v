@@ -5,17 +5,12 @@ template<uint64_t MEMORY_SIZE>
 void
 Riscv32i<MEMORY_SIZE>::fetch()
 {
-    this->current_instr = 0x0;
-
-    this->current_address = this->program_counter;
-
-    //little endian extraction
-    for (int i = 0; i < 4; i++) {
-        this->current_instr += (this->memory_bus->read(this->program_counter) << (8 * i));
-        this->program_counter++;
+    if (this->cache.getInstruction(this->program_counter, this->current_instr)) //true so address already in cache
+        return;
+    else { //not find in cache so need to read memory
+        this->current_instr = this->memory.read32(this->program_counter);
+        this->cache.setInstruction(this->program_counter, this->current_instr);
     }
-    //program_counter ready to read the next instruction
-
     this->opcode = this->current_instr & 0x7F; //the first 7 bits of the instruction to get opcode
 }
 

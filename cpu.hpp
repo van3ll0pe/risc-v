@@ -3,17 +3,18 @@
 #define __RISCV32I_HPP__
 
 #include "memory.hpp"
+#include "cpu_cache.hpp"
 #include <memory>
 #include <span>
 
 template<uint64_t MEMORY_SIZE>
 class Riscv32i {
     private:
-        std::unique_ptr<Memory<MEMORY_SIZE>> memory_bus;
+        Memory memory;
+        Cache cache;
         std::array<uint32_t, 32> reg_x;
         uint32_t program_counter;
         uint32_t current_instr;
-        uint32_t current_address;
         uint8_t opcode;
 
     public:
