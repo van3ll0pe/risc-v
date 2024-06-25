@@ -10,7 +10,7 @@
 template<uint64_t MEMORY_SIZE>
 class Riscv32i {
     private:
-        Memory memory;
+        Memory<MEMORY_SIZE> memory;
         Cache cache;
         std::array<uint32_t, 32> reg_x;
         uint32_t program_counter;
