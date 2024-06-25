@@ -6,7 +6,6 @@ void
 Riscv32i<MEMORY_SIZE>::fetch()
 {
     if (this->cache.getInstruction(this->program_counter, this->current_instr)) //true so address already in cache
-        return;
     else { //not find in cache so need to read memory
         this->current_instr = this->memory.read32(this->program_counter);
         this->cache.setInstruction(this->program_counter, this->current_instr);
