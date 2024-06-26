@@ -4,9 +4,8 @@
 
 #include <stdint.h>
 #include <map>
-#include <bool>
 
-#define CACHE_SIZE 250_000
+#define CACHE_SIZE 250000
 
 class Cache {
     private:
@@ -17,7 +16,7 @@ class Cache {
         ~Cache();
         bool getInstruction(uint32_t address, uint32_t& instruction);
         void setInstruction(uint32_t address, uint32_t instruction);
-        void clearCache()
+        void clearCache();
 };
 
 #endif //__CPU_CACHE
