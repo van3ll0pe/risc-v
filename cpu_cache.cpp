@@ -29,19 +29,11 @@ Cache::getInstruction(uint32_t address, uint32_t& instruction)
 void
 Cache::setInstruction(uint32_t address, uint32_t instruction)
 {
-    auto it = this->cacheData.find(address);
-
-    //add new element in the map
-    if (it == this->cacheData.end()) { 
-        if (this->cacheSize + 1 >= CACHE_SIZE)
-            this->cacheData.erase(this->cacheData.begin()); //remove the small address because no place
-        else
-            this->cacheSize += 1;
-        
-        this->cacheData.insert(address, instruction);
-        return;
-    }
-
-    it->second = instruction;
+    if (this->cacheSize + 1 >= CACHE_SIZE)
+        this->cacheData.erase(this->cacheData.begin());
+    else
+        this->cacheSize++;
+    
+    this->cacheData[address] = instruction;
     return;
 }

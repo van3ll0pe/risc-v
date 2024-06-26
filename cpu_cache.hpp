@@ -6,7 +6,7 @@
 #include <map>
 #include <bool>
 
-#define CACHE_SIZE 250_000;
+#define CACHE_SIZE 250_000
 
 class Cache {
     private:
